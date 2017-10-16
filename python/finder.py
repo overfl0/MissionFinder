@@ -4,11 +4,11 @@
 # Run the function:
 # hint str(["python.MissionFinder.get_missions"] call py3_fnc_callExtension)
 
-import json
 import logging
 import os
 
 from yapbol import PBOFile
+from .dummy_parser import parse_classfile
 
 
 logger = logging.getLogger(__name__)
@@ -22,15 +22,14 @@ def get_mission_metadata(filepath):
     #print('Loading file: {}'.format(filepath))
     f = PBOFile.read_file(filepath)
 
-    for entry in f:
-        #print(entry.filename)
-        if entry.filename == 'metadata.json':
-            #print(entry.data)
-            metadata = json.loads(entry.data.decode('utf-8'))
-            #print(metadata)
-            return metadata
+    try:
+        entry = f['metadata.hpp']
+        metadata = parse_classfile(entry.data.decode('utf-8'))
+        return metadata
 
-        #print(entry)
+    except KeyError:
+        return None
+
     return None
 
 
@@ -55,8 +54,9 @@ def get_missions():
             continue
 
         mission_metadata['filename'] = filename
-        entry = [mission_metadata['filename'], mission_metadata['displayName'], mission_metadata['minimumPlayers'], mission_metadata['maximumPlayers']]
+        entry = [[key, val] for key, val in mission_metadata.items()]
         missions.append(entry)
+
         logger.info('Adding file: {}'.format(filename))
 
     return missions
