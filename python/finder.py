@@ -45,7 +45,7 @@ def convert_to_arma_types(arg):
 
     # Dict: Convert to [[key, val], [key, val], ...]
     if isinstance(arg, dict):
-        return [[convert_to_arma_types(key), convert_to_arma_types(val)] for key, val in arg.items()]
+        return [[convert_to_arma_types(key), convert_to_arma_types(arg[key])] for key in sorted(arg.keys())]
 
     # Everything else: return it
     return arg
