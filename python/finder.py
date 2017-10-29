@@ -37,6 +37,20 @@ def filter_last_versions(all_missions):
     return all_missions
 
 
+
+def convert_to_arma_types(arg):
+    # Tuple or List: Convert to list
+    if isinstance(arg, tuple) or isinstance(arg, list):
+        return [convert_to_arma_types(element) for element in arg]
+
+    # Dict: Convert to [[key, val], [key, val], ...]
+    if isinstance(arg, dict):
+        return [[convert_to_arma_types(key), convert_to_arma_types(val)] for key, val in arg.items()]
+
+    # Everything else: return it
+    return arg
+
+
 def get_missions():
     missions_dir = get_missions_dir()
     missions = []
@@ -59,12 +73,11 @@ def get_missions():
                 continue
 
             mission_metadata['filename'] = filename
-            entry = [[key, val] for key, val in mission_metadata.items()]
-            missions.append(entry)
+            missions.append(mission_metadata)
 
             logger.info('Adding file: {}'.format(filename))
 
         except:
             logger.error('Something bad happened while analysing file: {}'.format(filename))
 
-    return filter_last_versions(missions)
+    return convert_to_arma_types(filter_last_versions(missions))
