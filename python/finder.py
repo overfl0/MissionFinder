@@ -14,12 +14,19 @@ from .dummy_parser import parse_classfile
 logger = logging.getLogger(__name__)
 
 def get_missions_dir():
+    """Return the directory where missions are stored for the current Arma installation"""
+    # TODO: This may have to be rewritten to not use os.getcwd but something more reliable
     #return r'D:\Steam\steamapps\common\Arma 3\MPMissions'
     return os.path.join(os.getcwd(), 'MPMissions')
 
 
 def get_mission_metadata(filepath):
-    #print('Loading file: {}'.format(filepath))
+    """
+    Open a PBO and fetch its metadata.
+    Return the metadata contents if found.
+    Return None otherwise.
+    """
+
     f = PBOFile.read_file(filepath)
 
     try:
@@ -34,11 +41,50 @@ def get_mission_metadata(filepath):
 
 
 def filter_last_versions(all_missions):
-    return all_missions
+    """
+    Filter the given dictionary of missions.
+    Return a dictionary of missions with only the latest version for each mission.
+    Mission version is denoted by a BARENAME_v<version>.MAP.pbo format name.
+    """
+
+    filtered = {}
+    for mission in all_missions:
+        try:
+            name_version = mission['filename'].split('.')[0]
+
+            try:
+                bare_name, ci_version = name_version.rsplit('_v', maxsplit=1)
+                ci_version = int(ci_version)
+
+            # Probably old-style mission names
+            except:
+                bare_name = name_version
+                ci_version = 0
+
+            # Update filtered if current version is higher than what we already have
+            dummy_entry = {'CI_version': -1}
+            existing_entry = filtered.get(bare_name, dummy_entry)
+            if ci_version > existing_entry['CI_version']:
+                filtered[bare_name] = mission
+                filtered[bare_name]['CI_version'] = ci_version
+
+        except:
+            logger.error('Error while filtering mission: {}'.format(mission))
+
+    return filtered
 
 
 
 def convert_to_arma_types(arg):
+    """
+    Convert python variables to Arma SQF variables
+    Tuple -> List
+    Dict -> [[key, val], [key, val], ...]
+    Everything_else -> Everything_else
+
+    Return the converted value.
+    """
+
     # Tuple or List: Convert to list
     if isinstance(arg, tuple) or isinstance(arg, list):
         return [convert_to_arma_types(element) for element in arg]
@@ -52,6 +98,10 @@ def convert_to_arma_types(arg):
 
 
 def get_missions():
+    """
+    Return a SQF dict with available missions.
+    """
+
     missions_dir = get_missions_dir()
     missions = []
 
