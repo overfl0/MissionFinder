@@ -35,6 +35,6 @@ def parse_classfile(data):
 
         retval[key] = val
 
-        print(key, val)
+        #print(key, val)
 
     return retval
