@@ -46,26 +46,6 @@ def main():
         print("Failed to determine Arma 3 Path.")
         return 1
 
-    try:
-        # Get the normal user name
-        regmission = winreg.ConnectRegistry(None, winreg.HKEY_CURRENT_USER)
-        keymission = winreg.OpenKey(regmission,
-                r"SOFTWARE\bohemia interactive\arma 3")
-        armauser = winreg.EnumValue(keymission,0)[1]
-    except:
-        print("Failed to determine Arma 3 User.")
-        return 2
-
-    from ctypes.wintypes import MAX_PATH
-
-    dll = ctypes.windll.shell32
-    buf = ctypes.create_unicode_buffer(MAX_PATH + 1)
-    if dll.SHGetSpecialFolderPathW(None, buf, 0x0005, False):
-        missionpath = os.path.join(buf.value, 'Arma 3 - Other Profiles', armauser, 'missions')
-    else:
-        print("Failed to determine Arma 3 Mission path.")
-        return 2
-
     scriptpath = os.path.realpath(__file__)
     projectpath = os.path.dirname(os.path.dirname(scriptpath))
     pythonpath = os.path.join(armapath, "python")
