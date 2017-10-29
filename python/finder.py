@@ -33,30 +33,38 @@ def get_mission_metadata(filepath):
     return None
 
 
+def filter_last_versions(all_missions):
+    return all_missions
+
+
 def get_missions():
     missions_dir = get_missions_dir()
     missions = []
 
     for filename in os.listdir(missions_dir):
-        filepath = os.path.join(missions_dir, filename)
+        try:
+            filepath = os.path.join(missions_dir, filename)
 
-        if not os.path.isfile(filepath):
-            continue
+            if not os.path.isfile(filepath):
+                continue
 
-        if not filename.endswith('.pbo'):
-            continue
+            if not filename.endswith('.pbo'):
+                continue
 
-        if not filename.startswith('FL_') and not filename.startswith('DFL_'):
-            continue
+            if not filename.startswith('FL_') and not filename.startswith('DFL_'):
+                continue
 
-        mission_metadata = get_mission_metadata(filepath)
-        if not mission_metadata:
-            continue
+            mission_metadata = get_mission_metadata(filepath)
+            if not mission_metadata:
+                continue
 
-        mission_metadata['filename'] = filename
-        entry = [[key, val] for key, val in mission_metadata.items()]
-        missions.append(entry)
+            mission_metadata['filename'] = filename
+            entry = [[key, val] for key, val in mission_metadata.items()]
+            missions.append(entry)
 
-        logger.info('Adding file: {}'.format(filename))
+            logger.info('Adding file: {}'.format(filename))
 
-    return missions
+        except:
+            logger.error('Something bad happened while analysing file: {}'.format(filename))
+
+    return filter_last_versions(missions)
