@@ -115,8 +115,8 @@ def get_missions():
             if not filename.endswith('.pbo'):
                 continue
 
-            if not filename.startswith('FL_') and not filename.startswith('DFL_'):
-                continue
+            # if not filename.startswith('FL_') and not filename.startswith('DFL_'):
+            #     continue
 
             mission_metadata = get_mission_metadata(filepath)
             if not mission_metadata:
